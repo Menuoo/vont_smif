@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
 public class Hammer : MonoBehaviour
 {
     public Rigidbody rb;
     public float velocityRequirement = 5f;
+    
 
     public float cooldown = 0.1f;
     bool ready = true;
@@ -21,7 +23,6 @@ public class Hammer : MonoBehaviour
     {
         //Debug.Log(rb.velocity.magnitude);
     }
-
 
     private void OnCollisionEnter(Collision collision)
     {
