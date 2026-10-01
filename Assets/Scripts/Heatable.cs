@@ -23,9 +23,11 @@ public class Heatable : MonoBehaviour
     public void changeTemperature(float input)
     {
         temperature += input;
+        temperature = Mathf.Min(1f, temperature);
         colour.r = temperature;
-        material.SetColor(Shader.PropertyToID("_Color"),colour);
-        this.GetComponent<Renderer>().material.color = colour;
+        colour.g = temperature / 2f;
+        material.SetColor(Shader.PropertyToID("_EmissionColor"), colour * 3f);
+        //this.GetComponent<Renderer>().material.color = colour;
     }
     
 }
