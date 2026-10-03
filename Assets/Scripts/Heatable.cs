@@ -7,6 +7,7 @@ public class Heatable : MonoBehaviour
     [Range (0.0f, 1.0f)]
     public float temperature = 0.0f;
     public Material material;
+    public MetalType metal;
     public Color colour;
     // Start is called before the first frame update
     void Start()
@@ -26,8 +27,10 @@ public class Heatable : MonoBehaviour
         temperature = Mathf.Min(1f, temperature);
         colour.r = temperature;
         colour.g = temperature / 2f;
-        material.SetColor(Shader.PropertyToID("_EmissionColor"), colour * 3f);
+        //material.SetColor(Shader.PropertyToID("_EmissionColor"), colour * 3f);
         //this.GetComponent<Renderer>().material.color = colour;
     }
     
 }
+
+public enum MetalType{ iron,bronze }
