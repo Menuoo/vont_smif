@@ -13,7 +13,9 @@ public class Smelter : MonoBehaviour
   
     void OnTriggerEnter(Collider other)
     {
-        whichMetal = other.GetComponent<Heatable>().metal;
+        Heatable heatable = other.GetComponent<Heatable>();
+        if (heatable != null)
+            whichMetal = heatable.metal;
         print("Object is \'"+whichMetal+"\'");
 
         Renderer newObject = Instantiate(prefab, transform.position+transform.forward,quaternion.identity);
