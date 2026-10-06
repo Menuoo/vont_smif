@@ -34,15 +34,16 @@ public class Hammer : MonoBehaviour
         {
             Debug.Log("fuck 2");
             float power = rb.velocity.magnitude;
-            obj.HammerThis(power);
+            obj.HammerThis(power, collision.GetContact(0).point, rb.velocity);
 
-            //ready = false;
+            ready = false;
             Invoke("Reload", cooldown);
         }
     }
 
-    void Reload()
+    public void Reload()
     {
+        Debug.Log("trigger reload");
         ready = true;
     }
 
