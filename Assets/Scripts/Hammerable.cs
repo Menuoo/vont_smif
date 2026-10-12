@@ -1,9 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Input;
-using static UnityEditor.PlayerSettings;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 public class Hammerable : MonoBehaviour
 {
@@ -13,6 +12,7 @@ public class Hammerable : MonoBehaviour
     [SerializeField] MeshCollider collid;
     [SerializeField] bool interpolated = true;
 
+    Heatable heatable;
 
     Mesh alterMesh;
     Mesh savedMesh;
@@ -36,15 +36,21 @@ public class Hammerable : MonoBehaviour
 
     private void Start()
     {
+        heatable = GetComponent<Heatable>();
         Configure();
     }
 
     public void Configure()
     {
-        cubicity = 1.05f;
-        savedMesh = Object.Instantiate(cube.mesh);
+        cubicity = 1.0f;
+        savedMesh = Instantiate(cube.mesh);
         alterMesh = cube.mesh;
         rb.sleepThreshold = 0.0f;
+
+        if (interpolated)
+        {
+            InterpolateGeometry(0f);
+        }
     }
 
 
@@ -105,72 +111,84 @@ public class Hammerable : MonoBehaviour
     void InterpolateGeometry(float pow)
     {
         Debug.Log("--------START----------");
+        float heatFactor = 1f;
+        if (heatable != null)
+        {
+            heatFactor = Mathf.Max(heatable.temperature * heatable.temperature, 0f) * 1f;
+        }
 
-        float val = pow / 100f;
+        float val = pow / 100f * heatFactor;
         cubicity = Mathf.Max(0f, cubicity - val);
+
+
         List<Vector3> newV = new List<Vector3>();
 
+        float[] bounds = { 10000f, -10000f, 10000f, -10000f, 10000f, -10000f }; // min and max bounds for x, y, z
+        float maxBound = 0f;
+        Vector3 sphereScale = Vector3.one;
+        Vector3 midPoint = Vector3.zero;
+
+        // get spherization parameters
         foreach (Vector3 v in savedMesh.vertices)
-        { }
+        {
+            if (v.x < bounds[0])
+                bounds[0] = v.x;
+            if (v.x > bounds[1])
+                bounds[1] = v.x;
+
+            if (v.y < bounds[2])
+                bounds[2] = v.y;
+            if (v.y > bounds[3])
+                bounds[3] = v.y;
+
+            if (v.z < bounds[4])
+                bounds[4] = v.z;
+            if (v.z > bounds[5])
+                bounds[5] = v.z;
+
+            if (bounds[1] - bounds[0] > bounds[3] - bounds[2])
+                maxBound = bounds[1] - bounds[0];
+            else
+                maxBound = bounds[3] - bounds[2];
+            if (bounds[5] - bounds[4] > maxBound)
+                maxBound = bounds[5] - bounds[4];
+        }
+        sphereScale = new Vector3(1f / ((bounds[1] - bounds[0]) / maxBound), 1f / ((bounds[3] - bounds[2]) / maxBound), 1f / ((bounds[5] - bounds[4]) / maxBound));
+        //sphereScale *= 2f;
+        midPoint = new Vector3((bounds[1] + bounds[0]) / 2f,(bounds[3] + bounds[2]) / 2f, (bounds[5] + bounds[4]) / 2f);
+
+        Debug.Log(bounds[0] + " " + bounds[1] + " " + bounds[2] + " " + bounds[3] + " " + bounds[4] + " " + bounds[5] + " ");
+        Debug.Log(sphereScale);
+        Debug.Log(midPoint);
 
         foreach (Vector3 v in savedMesh.vertices)
         {
             Vector3 vv = v;
-            Vector3 ingotFactors = Vector3.one;
 
             // spherize
-            vv = v.normalized;
+            vv = v;// + midPoint;
+            vv = vv * (Mathf.Log10(1f / (vv.magnitude + 0.05f)) + 2f);
+            //vv.Scale(sphereScale);
+            vv = vv.normalized;
+
 
             // cubize
-            int i;
-            float r, a;
-            // major axis and size
-            a = Mathf.Abs(vv.x);
-            r = a; i = 0;
-            a = Mathf.Abs(vv.y); 
-            if (r < a) { r = a; i = 1; }
-            a = Mathf.Abs(vv.z); 
-            if (r < a) { r = a; i = 2; }
-            vv = vv / r;
-            r *= 1.75f; 
-            a = 4.0f * r / Mathf.PI;
-
-            // convert of cube + linearization
-            if (i == 0) { vv.y = a * Mathf.Atan(vv.y / r); vv.z = a * Mathf.Atan(vv.z / r); }
-            else if (i == 1) { vv.x = a * Mathf.Atan(vv.x / r); vv.z = a * Mathf.Atan(vv.z / r); }
-            else { vv.x = a * Mathf.Atan(vv.x / r); vv.y = a * Mathf.Atan(vv.y / r); }
-            // just remedy boundaries after linearization
-            if (vv.x < -1.0f) vv.x = -1.0f;
-            if (vv.x > +1.0f) vv.x = +1.0f;
-            if (vv.y < -1.0f) vv.y = -1.0f;
-            if (vv.y > +1.0f) vv.y = +1.0f;
-            if (vv.z < -1.0f) vv.z = -1.0f;
-            if (vv.z > +1.0f) vv.z = +1.0f;
+            vv = Cubize(vv);
+            vv = vv.normalized;
+            vv = Cubize(vv);
+            vv = vv.normalized;
+            vv = Cubize(vv);
+            vv = vv.normalized;
+            vv = Cubize(vv);
+            vv = vv.normalized;
+            vv = Cubize(vv);
 
             //ingotize
-            if (vv.y <= 1f && vv.y > 0.8f)
-            {
-                float factor = Mathf.Lerp(1f, 0.95f, (vv.y - 0.8f) / 0.2f);
-                ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
-                ingotFactors.z *= factor;
-            }
-            else
-            {
-                float factor = Mathf.Lerp(1.3f, 1f, (vv.y + 1.0f) / 1.8f);
-                ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
-                ingotFactors.z *= factor;
-            }
-            if (vv.y >= -1f && vv.y < -0.8f)
-            {
-                float factor = Mathf.Lerp(0.95f, 1f, (vv.y + 1.0f) / 0.2f);
-                ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
-                ingotFactors.z *= factor;
-            }
+            vv = Ingotize(vv);
 
-            vv.Scale(new Vector3(0.5f, 0.25f, 1f));
-            vv.Scale(ingotFactors);
-            vv = vv * 1.2f;
 
+            vv.Scale(new Vector3(0.5f, 0.25f, 1f)); // rectangular shape
+            vv = vv * 0.5f + midPoint;
 
             // interpolate final vertex
             vv = Vector3.Lerp(v, vv, cubicity);
@@ -185,4 +203,67 @@ public class Hammerable : MonoBehaviour
 
         Debug.Log("----------END----------------");
     }
+
+    Vector3 Cubize(Vector3 vv)
+    {
+        int i;
+        float r, a;
+        // major axis and size
+        a = Mathf.Abs(vv.x);
+        r = a; i = 0;
+        a = Mathf.Abs(vv.y);
+        if (r < a) { r = a; i = 1; }
+        a = Mathf.Abs(vv.z);
+        if (r < a) { r = a; i = 2; }
+        vv = vv / r;
+        r *= 1.75f;
+        a = 4.0f * r / Mathf.PI;
+
+        // convert of cube + linearization
+        if (i == 0) { vv.y = a * Mathf.Atan(vv.y / r); vv.z = a * Mathf.Atan(vv.z / r); }
+        else if (i == 1) { vv.x = a * Mathf.Atan(vv.x / r); vv.z = a * Mathf.Atan(vv.z / r); }
+        else { vv.x = a * Mathf.Atan(vv.x / r); vv.y = a * Mathf.Atan(vv.y / r); }
+        // just remedy boundaries after linearization
+        if (vv.x < -1.0f) vv.x = -1.0f;
+        if (vv.x > +1.0f) vv.x = +1.0f;
+        if (vv.y < -1.0f) vv.y = -1.0f;
+        if (vv.y > +1.0f) vv.y = +1.0f;
+        if (vv.z < -1.0f) vv.z = -1.0f;
+        if (vv.z > +1.0f) vv.z = +1.0f;
+
+        Vector3 perfect = new Vector3(Mathf.Round(vv.x), Mathf.Round(vv.y), Mathf.Round(vv.z));
+        //vv = Vector3.Lerp(vv, perfect, cubicity);
+
+        return vv;
+    }
+
+    Vector3 Ingotize(Vector3 vv)
+    {
+        Vector3 ingotFactors = Vector3.one;
+        if (vv.y <= 1f && vv.y > 0.8f)
+        {
+            float factor = Mathf.Lerp(1f, 0.95f, (vv.y - 0.8f) / 0.2f);
+            ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
+            ingotFactors.z *= factor;
+        }
+        else
+        {
+            float factor = Mathf.Lerp(1.3f, 1f, (vv.y + 1.0f) / 1.8f);
+            ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
+            ingotFactors.z *= factor;
+        }
+        if (vv.y >= -1f && vv.y < -0.8f)
+        {
+            float factor = Mathf.Lerp(0.95f, 1f, (vv.y + 1.0f) / 0.2f);
+            ingotFactors.x *= factor; //* Mathf.Sin(vv.y * 10f);
+            ingotFactors.z *= factor;
+        }
+        vv.Scale(ingotFactors);
+
+        return vv;
+    }
+
+
+
+
 }
