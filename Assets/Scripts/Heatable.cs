@@ -25,15 +25,16 @@ public class Heatable : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        changeTemperature(0f);
+        changeTemperature(-Time.fixedDeltaTime / 5f);
     }
 
     public void changeTemperature(float input)
     {
         temperature += input;
-        temperature = Mathf.Min(1f, temperature);
+        //temperature = Mathf.Min(1f, temperature);
+        temperature = Mathf.Clamp01(temperature);
         colour.r = temperature;
         colour.g = temperature / 2f;
         colour.a = 1f;

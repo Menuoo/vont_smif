@@ -28,12 +28,12 @@ public class Hammer : MonoBehaviour
         Debug.Log("fuck");
 
         Hammerable obj = collision.gameObject.GetComponent<Hammerable>();
+        float power = collision.GetContact(0).impulse.magnitude;
 
-        if (obj != null && ready && rb.velocity.magnitude > velocityRequirement)
+        if (obj != null && ready && power > velocityRequirement)
         {
-            Debug.Log("fuck 2");
-            float power = rb.velocity.magnitude;
-            obj.HammerThis(power, collision.GetContact(0).point, rb.velocity);
+            Debug.Log("Impulse: " + power);
+            obj.HammerThis(5f, collision.GetContact(0).point, collision.GetContact(0).impulse.normalized);
 
             ready = false;
             Invoke("Reload", cooldown);
