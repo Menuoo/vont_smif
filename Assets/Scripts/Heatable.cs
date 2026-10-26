@@ -39,7 +39,7 @@ public class Heatable : MonoBehaviour
         colour.g = temperature / 2f;
         colour.a = 1f;
 
-        propertyBlock.SetColor("_EmissionColor", colour * 3f);
+        propertyBlock.SetColor("_EmissionColor", colour * 2f);
         render.SetPropertyBlock(propertyBlock);
         material.EnableKeyword("_EMISSION");
         //render.material.SetColor(Shader.PropertyToID("_EmissionColor"), colour * 3f);

@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
+using UnityEditor.XR.LegacyInputHelpers;
 using UnityEngine;
 using UnityEngine.XR.OpenXR.Input;
 
@@ -10,16 +12,25 @@ public class Hammerable : MonoBehaviour
     [SerializeField] Rigidbody rb;
     [SerializeField] MeshFilter cube;
     [SerializeField] MeshCollider collid;
+
+    [Header("Deform Settings")]
     [SerializeField] bool interpolated = true;
+    [SerializeField] float seed = 14658.4564654564f;
+    [SerializeField] float scale = 10f;
+    [SerializeField] int bumpAmount = 10;
+    [SerializeField] float bumpSize = 0.1f;
+    [SerializeField] float maxDeform = 0.5f;
+
+    [Header("Other")]
+    [SerializeField] Vector3 debugPos = Vector3.zero;
+    [Range(0, 1)]
+    public float cubicity = 1;
 
     Heatable heatable;
 
     Mesh alterMesh;
     Mesh savedMesh;
     public float toughness = 1.0f;
-
-    [Range(0, 1)]
-    public float cubicity = 1;
 
 
     void Update()
@@ -30,7 +41,7 @@ public class Hammerable : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            HammerThis(5f, new Vector3(0, 1, 0), new Vector3(0, 1, 0));
+            HammerThis(5f, debugPos, new Vector3(0, 1, 0));
         }
     }
 
@@ -51,6 +62,10 @@ public class Hammerable : MonoBehaviour
         {
             InterpolateGeometry(0f);
         }
+        else
+        {
+            DeformGeometry(0f, Vector3.zero, Vector3.zero, true);
+        }
     }
 
 
@@ -67,46 +82,103 @@ public class Hammerable : MonoBehaviour
 
     public void Deform(float pow, Vector3 pos, Vector3 fwd)
     {
-        Vector3 locPos = pos;//this.transform.InverseTransformPoint(pos); //      we SHOULD be transforming the point itself, not every vertex, but. lol.    (this is way easier)
+        Vector3 locPos = pos; //this.transform.InverseTransformPoint(pos); //      we SHOULD be transforming the point itself, not every vertex, but. lol.    (this is way easier)
 
         Debug.Log("loc: " + locPos);
         Debug.Log("fwd: " + fwd);
 
-        DeformGeometry(pow, pos, fwd.normalized);
+        DeformGeometry(maxDeform, locPos, fwd.normalized, false); // pow excluded for now, pain in the ass (replaced with maxDeform)
 
-        // Recalc collider
+        /*
         alterMesh.RecalculateBounds();
-        collid.sharedMesh = alterMesh;
+        collid.sharedMesh = alterMesh;*/
     }
 
-    void DeformGeometry(float pow,Vector3 pos, Vector3 fwd)
+    void DeformGeometry(float pow, Vector3 pos, Vector3 fwd, bool init)
     {
         Debug.Log("--------START----------");
 
         List<Vector3> newV = new List<Vector3>();
 
-        foreach (Vector3 v in alterMesh.vertices)
+        int i = 0;
+        foreach (Vector3 v in savedMesh.vertices)
         {
-            Vector3 vv = v;
+            Vector3 vv = alterMesh.vertices[i];
 
-            Vector3 check = transform.TransformPoint(v);
-            float dist = Vector3.Distance(check, pos);
-
-            if (dist < 0.05)
+            if (!init)
             {
-                vv = vv + fwd * (0.05f - dist) * (pow + 1.5f);
-                //Debug.Log("Change!");
+                float diff = Vector3.Distance(vv, v);
+
+                Vector3 check = transform.TransformPoint(vv);
+                float dist = Vector3.Distance(check, pos);
+
+                //Debug.Log(dist);
+
+                if (dist < maxDeform * 2f)
+                {
+                    //vv = vv + fwd * (0.05f - dist) * (pow + 1.5f);
+                    //vv *= 0.9f;
+                    //Debug.Log("Change!");
+
+                    float final = pow * (((maxDeform * 2f - dist) / (maxDeform * 2f)) + 0.1f);
+                    //final = 0.5f * maxDeform;
+
+                    if (diff - final > 0.001f)
+                        final = 1f - (diff - final) / diff;
+                    else
+                        final = 1f;
+
+                    vv = Vector3.Lerp(vv, v, final);
+                }
             }
 
             newV.Add(vv);
+            i++;
+        }
+
+        if (init)
+        {
+            int bumps = 0;
+            while (bumps < bumpAmount)
+            {
+                int randInd = (int)(Mathf.Min(UnityEngine.Random.value * savedMesh.vertices.Length, savedMesh.vertices.Length - 1));
+                Vector3 vv = newV[randInd];
+                Vector3 nrml = savedMesh.normals[randInd];
+
+                for (int j = 0; j < newV.Count; j++)
+                {
+                    float dist = Vector3.Distance(vv, newV[j]);
+                    if (dist < bumpSize)
+                    {
+                        newV[j] += nrml * ((bumpSize - dist) / bumpSize) * maxDeform;
+                    }
+                }
+                bumps++;
+            }
         }
 
 
         alterMesh.vertices = newV.ToArray();
         alterMesh.RecalculateNormals();
+        alterMesh.RecalculateBounds();
+        collid.sharedMesh = alterMesh;
 
         Debug.Log("----------END----------------");
     }
+
+
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
 
     void InterpolateGeometry(float pow)
     {
