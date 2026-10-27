@@ -7,12 +7,12 @@ public class Furnace : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        print("its in");
+        //print("its in");
     }
 
     void OnTriggerExit(Collider other)
     {
-        print("its out");
+        //print("its out");
     }
     void OnTriggerStay(Collider other)
     {

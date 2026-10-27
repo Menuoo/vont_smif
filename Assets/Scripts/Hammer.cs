@@ -25,7 +25,7 @@ public class Hammer : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("fuck");
+        //Debug.Log("fuck");
 
         Hammerable obj = collision.gameObject.GetComponent<Hammerable>();
         float power = collision.GetContact(0).impulse.magnitude;

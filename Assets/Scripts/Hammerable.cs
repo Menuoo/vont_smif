@@ -9,7 +9,7 @@ using UnityEngine.XR.OpenXR.Input;
 public class Hammerable : MonoBehaviour
 {
     //[SerializeField] GameObject point;
-    [SerializeField] Rigidbody rb;
+    //[SerializeField] Rigidbody rb;
     [SerializeField] MeshFilter cube;
     [SerializeField] MeshCollider collid;
 
@@ -27,6 +27,7 @@ public class Hammerable : MonoBehaviour
     public float cubicity = 1;
 
     Heatable heatable;
+    Rigidbody rb;
 
     Mesh alterMesh;
     Mesh savedMesh;
@@ -52,6 +53,7 @@ public class Hammerable : MonoBehaviour
     private void Start()
     {
         heatable = GetComponent<Heatable>();
+        rb = GetComponent<Rigidbody>();
         Configure();
     }
 
@@ -60,7 +62,9 @@ public class Hammerable : MonoBehaviour
         cubicity = 1.0f;
         savedMesh = Instantiate(cube.mesh);
         alterMesh = cube.mesh;
-        rb.sleepThreshold = 0.0f;
+
+        if (rb != null)
+            rb.sleepThreshold = 0.0f;
 
         if (interpolated)
         {
@@ -76,7 +80,7 @@ public class Hammerable : MonoBehaviour
 
     public void HammerThis(float power, Vector3 pos, Vector3 fwd)
     {
-        Debug.Log("kyaaaaaaaaa :: " + power);
+        Debug.Log("kyaaaaaaaaa i am [" + gameObject.name + "] :: " + power);
 
         if (interpolated)
             InterpolateGeometry(power);
@@ -88,8 +92,8 @@ public class Hammerable : MonoBehaviour
     {
         Vector3 locPos = pos; //this.transform.InverseTransformPoint(pos); //      we SHOULD be transforming the point itself, not every vertex, but. lol.    (this is way easier)
 
-        Debug.Log("loc: " + locPos);
-        Debug.Log("fwd: " + fwd);
+        //Debug.Log("loc: " + locPos);
+        //Debug.Log("fwd: " + fwd);
 
         DeformGeometry(maxDeform, locPos, fwd.normalized, false); // pow excluded for now, pain in the ass (replaced with maxDeform)
 
@@ -100,7 +104,7 @@ public class Hammerable : MonoBehaviour
 
     void DeformGeometry(float pow, Vector3 pos, Vector3 fwd, bool init)
     {
-        Debug.Log("--------START----------");
+        //Debug.Log("--------START----------");
 
         List<Vector3> newV = new List<Vector3>();
 
@@ -118,13 +122,17 @@ public class Hammerable : MonoBehaviour
 
                 //Debug.Log(dist);
 
-                if (dist < maxDeform * 2f)
+                if (dist < maxDeform * 3f)
                 {
                     //vv = vv + fwd * (0.05f - dist) * (pow + 1.5f);
                     //vv *= 0.9f;
                     //Debug.Log("Change!");
 
-                    float final = pow * (((maxDeform * 2f - dist) / (maxDeform * 2f)) + 0.1f);
+                    float final = pow * (((maxDeform * 3f - dist) / (maxDeform * 3f)) + 0.3f);
+
+                    if (heatable != null)
+                        final *= (heatable.temperature * heatable.temperature);
+
                     //final = 0.5f * maxDeform;
 
                     if (diff - final > 0.001f)
@@ -167,7 +175,7 @@ public class Hammerable : MonoBehaviour
         alterMesh.RecalculateBounds();
         collid.sharedMesh = alterMesh;
 
-        Debug.Log("----------END----------------");
+        //Debug.Log("----------END----------------");
     }
 
 
