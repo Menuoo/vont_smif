@@ -35,14 +35,18 @@ public class Hammerable : MonoBehaviour
 
     void Update()
     {
-        rb.AddForce(Vector3.zero);
-
         //InterpolateGeometry(0f);
 
         if (Input.GetKeyDown(KeyCode.Q))
         {
             HammerThis(5f, debugPos, new Vector3(0, 1, 0));
         }
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb != null)
+            rb.AddForce(Vector3.zero);
     }
 
     private void Start()
