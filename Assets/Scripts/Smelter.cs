@@ -10,6 +10,9 @@ public class Smelter : MonoBehaviour
     public Material[] mat;
     public Renderer prefab;
     MetalType whichMetal;
+
+    [Range(0, 100)]
+    public int metalCount = 0;
   
     void OnTriggerEnter(Collider other)
     {
@@ -18,10 +21,18 @@ public class Smelter : MonoBehaviour
             whichMetal = heatable.metal;
         print("Object is \'"+whichMetal+"\'");
 
-        Renderer newObject = Instantiate(prefab, transform.position+transform.forward,quaternion.identity);
-        newObject.material = mat[(int)whichMetal];
+        this.metalCount += 50;
 
+        print("Metal: "+this.metalCount);
+        if(this.metalCount == 100)
+        {
+            Renderer newObject = Instantiate(prefab, transform.position+transform.forward,quaternion.identity);
+            newObject.material = mat[(int)whichMetal];
+            this.metalCount = 0;
+        }
+                
         Destroy(other.gameObject); // make sure player hands donut touch it lol :)
+
 
     }
     // Start is called before the first frame update
@@ -35,4 +46,5 @@ public class Smelter : MonoBehaviour
     {
         
     }
+
 }
