@@ -122,13 +122,13 @@ public class Hammerable : MonoBehaviour
 
                 //Debug.Log(dist);
 
-                if (dist < maxDeform * 3f)
+                if (dist < maxDeform * 6f)
                 {
                     //vv = vv + fwd * (0.05f - dist) * (pow + 1.5f);
                     //vv *= 0.9f;
                     //Debug.Log("Change!");
 
-                    float final = pow * (((maxDeform * 3f - dist) / (maxDeform * 3f)) + 0.3f);
+                    float final = pow * (((maxDeform * 6f - dist) / (maxDeform * 6f)) + 0.6f);
 
                     if (heatable != null)
                         final *= (heatable.temperature * heatable.temperature);

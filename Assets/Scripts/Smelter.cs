@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class Smelter : MonoBehaviour
 {
+    public CastArea castArea;
     public Material[] mat;
     public Renderer prefab;
     MetalType whichMetal;
@@ -26,7 +27,12 @@ public class Smelter : MonoBehaviour
         print("Metal: "+this.metalCount);
         if(this.metalCount == 100)
         {
-            Renderer newObject = Instantiate(prefab, transform.position+transform.forward,quaternion.identity);
+            Renderer newObj = prefab;
+
+            if (castArea.currentCast != null)
+                newObj = castArea.currentCast.GetCastObject();
+
+            Renderer newObject = Instantiate(newObj, transform.position+transform.forward,quaternion.identity);
             newObject.material = mat[(int)whichMetal];
             this.metalCount = 0;
         }

@@ -27,7 +27,7 @@ public class Heatable : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        changeTemperature(-Time.fixedDeltaTime / 5f);
+        changeTemperature(-Time.fixedDeltaTime / 15f);
     }
 
     public void changeTemperature(float input)
@@ -39,7 +39,7 @@ public class Heatable : MonoBehaviour
         colour.g = temperature / 2f;
         colour.a = 1f;
 
-        propertyBlock.SetColor("_EmissionColor", colour * 2f);
+        propertyBlock.SetColor("_EmissionColor", colour * 1.5f);
         render.SetPropertyBlock(propertyBlock);
         material.EnableKeyword("_EMISSION");
         //render.material.SetColor(Shader.PropertyToID("_EmissionColor"), colour * 3f);
