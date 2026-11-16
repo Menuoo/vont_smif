@@ -18,10 +18,12 @@ public class grindstone : MonoBehaviour
     }
     public void OnTriggerStay(Collider other)
     {
-        sparks.transform.position = other.ClosestPoint(transform.position);
+        Vector3 closePoint = other.ClosestPoint(transform.position);
+        sparks.transform.position = closePoint;
+        sparks.transform.LookAt(transform.position + other.transform.position - transform.position);
 
         // DO SHIT HERE
-        // sparksColour.a = polishProcess; IDEA FOR SHIT DOING
+        // sparksColour.a = polishProcess; IDEA FOR SHIT DOING             w idea - A
     }
 
     public void OnTriggerEnter(Collider other)
