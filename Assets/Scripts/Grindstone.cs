@@ -6,6 +6,7 @@ public class grindstone : MonoBehaviour
 {   
     public ParticleSystem sparks;
     public Color sparksColour = new Color(1f,1f,1f);
+    public AudioSource grindingNoise;
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -14,6 +15,7 @@ public class grindstone : MonoBehaviour
 
     void Start()
     {
+        
         sparks.Stop();
     }
     public void OnTriggerStay(Collider other)
@@ -28,11 +30,14 @@ public class grindstone : MonoBehaviour
 
     public void OnTriggerEnter(Collider other)
     {
+        
         sparks.Play();
+        grindingNoise.Play();
     }
     public void OnTriggerExit(Collider other)
     {
         sparks.Stop();
+        grindingNoise.Pause();
     }
 
 }

@@ -6,6 +6,7 @@ public class Cooling : MonoBehaviour
 {
     public ParticleSystem smoke;
     public Color smokeColour = new Color(1f,1f,1f,1f);
+    public AudioSource sizzle;
 
     // Start is called before the first frame update
     void Start()
@@ -16,6 +17,7 @@ public class Cooling : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         smoke.Play();
+        sizzle.Play();
     }
     void OnTriggerStay(Collider other)
     {
@@ -25,10 +27,12 @@ public class Cooling : MonoBehaviour
             obj.changeTemperature(Time.fixedDeltaTime/5f * -1.0f);
             smokeColour.a = obj.temperature;
             smoke.startColor = smokeColour;
+            sizzle.volume = obj.temperature;
         }
     }
     void OnTriggerExit(Collider other)
     {
+        sizzle.Stop();
         smoke.Stop();
     }
 
