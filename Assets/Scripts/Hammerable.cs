@@ -32,7 +32,8 @@ public class Hammerable : MonoBehaviour
     Mesh alterMesh;
     Mesh savedMesh;
     public float toughness = 1.0f;
-    float totalOffset = 0f;
+    float currOffset = 1f;
+    float totalOffset = 1f;
 
     void Update()
     {
@@ -173,6 +174,7 @@ public class Hammerable : MonoBehaviour
                 bumps++;
             }
             totalOffset = offsetSum;
+            currentOffset = totalOffset;
         }
 
 
@@ -181,7 +183,9 @@ public class Hammerable : MonoBehaviour
         alterMesh.RecalculateBounds();
         collid.sharedMesh = alterMesh;
 
-        Debug.Log(currentOffset + "/" + totalOffset);
+        
+        currOffset = currentOffset;
+        Debug.Log(currOffset + "/" + totalOffset);
         return (totalOffset - currentOffset) / totalOffset;
         //Debug.Log("----------END----------------");
     }

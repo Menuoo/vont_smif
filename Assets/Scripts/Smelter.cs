@@ -95,6 +95,7 @@ public class Smelter : MonoBehaviour
 
         Heatable temp = newObject.GetComponent<Heatable>();
         temp?.changeTemperature(1f);
+        temp?.changeSmoothness(-1f);
     }
 
 

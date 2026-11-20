@@ -6,7 +6,8 @@ Shader "Custom/CustomMetal"
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
-        [HDR] _Emission ("Emission", Color) = (0,0,0,0)
+        [HDR] _EmissionColor ("Emission", Color) = (0,0,0,0)
+        _Smooth ("Smooth (Noise control)", Range(0,1)) = 0.0
     }
     SubShader
     {
@@ -27,10 +28,11 @@ Shader "Custom/CustomMetal"
             float2 uv_MainTex;
         };
 
+        float _Smooth;
         half _Glossiness;
         half _Metallic;
         fixed4 _Color;
-        fixed4 _Emission;
+        fixed4 _EmissionColor;
 
         // Add instancing support for this shader. You need to check 'Enable Instancing' on materials that use the shader.
         // See https://docs.unity3d.com/Manual/GPUInstancing.html for more information about instancing.
@@ -42,13 +44,18 @@ Shader "Custom/CustomMetal"
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             // Albedo comes from a texture tinted by color
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+            float smooth = 0.3 + 0.25 * _Smooth + 0.45 * step(0.99, _Smooth);
+            fixed4 c = step(tex2D (_MainTex, IN.uv_MainTex), smooth + 0.001);
+
+            o.Smoothness = c.r * _Glossiness;
+
+            c = c.r * _Color + (1 - c.r) * float4(1,1,1,1);
             o.Albedo = c.rgb;
+
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
             o.Alpha = c.a;
-            o.Emission = _Emission;
+            o.Emission = _EmissionColor;
         }
         ENDCG
     }

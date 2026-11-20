@@ -24,6 +24,12 @@ public class grindstone : MonoBehaviour
         sparks.transform.position = closePoint;
         sparks.transform.LookAt(transform.position + other.transform.position - transform.position);
 
+        Heatable obj = other.gameObject.GetComponent<Heatable>();
+        if (obj != null)
+        {
+            obj.changeSmoothness(Time.fixedDeltaTime / 3f);
+        }
+
         // DO SHIT HERE
         // sparksColour.a = polishProcess; IDEA FOR SHIT DOING             w idea - A
     }
