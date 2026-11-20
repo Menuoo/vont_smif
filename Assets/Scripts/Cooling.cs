@@ -24,7 +24,7 @@ public class Cooling : MonoBehaviour
         Heatable obj = other.gameObject.GetComponent<Heatable>();
         if(obj !=null)
         {
-            obj.changeTemperature(Time.fixedDeltaTime/5f * -1.0f);
+            obj.changeTemperature(Time.fixedDeltaTime/3f * -1.0f);
             smokeColour.a = obj.temperature;
             smoke.startColor = smokeColour;
             sizzle.volume = obj.temperature;

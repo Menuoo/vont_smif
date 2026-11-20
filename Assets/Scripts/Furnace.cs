@@ -20,7 +20,7 @@ public class Furnace : MonoBehaviour
 
         if(obj !=null)
         {
-            obj.changeTemperature(Time.fixedDeltaTime/5f);
+            obj.changeTemperature(Time.fixedDeltaTime/3f);
         }
     }
     // Start is called before the first frame update

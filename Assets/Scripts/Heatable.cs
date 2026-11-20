@@ -27,7 +27,7 @@ public class Heatable : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        
+        changeTemperature(-Time.fixedDeltaTime/20f);
     }
 
     public void changeTemperature(float input)
