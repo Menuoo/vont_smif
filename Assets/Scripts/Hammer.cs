@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Hammer : MonoBehaviour
 {
+    [SerializeField] AudioSource audioSrc;
     public Rigidbody rb;
     public float velocityRequirement = 5f;
     
@@ -30,10 +31,14 @@ public class Hammer : MonoBehaviour
         Hammerable obj = collision.gameObject.GetComponent<Hammerable>();
         float power = collision.GetContact(0).impulse.magnitude;
 
+
+
         if (obj != null && ready && power > velocityRequirement)
         {
             Debug.Log("Impulse: " + power);
-            obj.HammerThis(5f, collision.GetContact(0).point, collision.GetContact(0).impulse.normalized);
+            float pitchFactor = obj.HammerThis(5f, collision.GetContact(0).point, collision.GetContact(0).impulse.normalized);
+            audioSrc.pitch = 0.9f + 0.15f * pitchFactor;
+            audioSrc.PlayOneShot(audioSrc.clip);
 
             ready = false;
             Invoke("Reload", cooldown);

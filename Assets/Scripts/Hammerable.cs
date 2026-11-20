@@ -32,7 +32,7 @@ public class Hammerable : MonoBehaviour
     Mesh alterMesh;
     Mesh savedMesh;
     public float toughness = 1.0f;
-
+    float totalOffset = 0f;
 
     void Update()
     {
@@ -78,36 +78,37 @@ public class Hammerable : MonoBehaviour
 
 
 
-    public void HammerThis(float power, Vector3 pos, Vector3 fwd)
+    public float HammerThis(float power, Vector3 pos, Vector3 fwd)
     {
         Debug.Log("kyaaaaaaaaa i am [" + gameObject.name + "] :: " + power);
 
         if (interpolated)
-            InterpolateGeometry(power);
+            return InterpolateGeometry(power);
         else
-            Deform(power, pos, fwd);
+            return Deform(power, pos, fwd);
     }
 
-    public void Deform(float pow, Vector3 pos, Vector3 fwd)
+    public float Deform(float pow, Vector3 pos, Vector3 fwd)
     {
         Vector3 locPos = pos; //this.transform.InverseTransformPoint(pos); //      we SHOULD be transforming the point itself, not every vertex, but. lol.    (this is way easier)
 
         //Debug.Log("loc: " + locPos);
         //Debug.Log("fwd: " + fwd);
 
-        DeformGeometry(maxDeform, locPos, fwd.normalized, false); // pow excluded for now, pain in the ass (replaced with maxDeform)
+        return DeformGeometry(maxDeform, locPos, fwd.normalized, false); // pow excluded for now, pain in the ass (replaced with maxDeform)
 
         /*
         alterMesh.RecalculateBounds();
         collid.sharedMesh = alterMesh;*/
     }
 
-    void DeformGeometry(float pow, Vector3 pos, Vector3 fwd, bool init)
+    float DeformGeometry(float pow, Vector3 pos, Vector3 fwd, bool init)
     {
         //Debug.Log("--------START----------");
 
         List<Vector3> newV = new List<Vector3>();
 
+        float currentOffset = 0f;
         int i = 0;
         foreach (Vector3 v in savedMesh.vertices)
         {
@@ -144,12 +145,14 @@ public class Hammerable : MonoBehaviour
                 }
             }
 
+            currentOffset += (vv - v).magnitude;
             newV.Add(vv);
             i++;
         }
 
         if (init)
         {
+            float offsetSum = 0f;
             int bumps = 0;
             while (bumps < bumpAmount)
             {
@@ -162,11 +165,14 @@ public class Hammerable : MonoBehaviour
                     float dist = Vector3.Distance(vv, newV[j]);
                     if (dist < bumpSize)
                     {
-                        newV[j] += nrml * ((bumpSize - dist) / bumpSize) * maxDeform;
+                        Vector3 addOffset = nrml * ((bumpSize - dist) / bumpSize) * maxDeform;
+                        newV[j] += addOffset;
+                        offsetSum += addOffset.magnitude;
                     }
                 }
                 bumps++;
             }
+            totalOffset = offsetSum;
         }
 
 
@@ -175,6 +181,8 @@ public class Hammerable : MonoBehaviour
         alterMesh.RecalculateBounds();
         collid.sharedMesh = alterMesh;
 
+        Debug.Log(currentOffset + "/" + totalOffset);
+        return (totalOffset - currentOffset) / totalOffset;
         //Debug.Log("----------END----------------");
     }
 
@@ -192,7 +200,7 @@ public class Hammerable : MonoBehaviour
 
 
 
-    void InterpolateGeometry(float pow)
+    float InterpolateGeometry(float pow)
     {
         Debug.Log("--------START----------");
         float heatFactor = 1f;
@@ -286,6 +294,7 @@ public class Hammerable : MonoBehaviour
         collid.sharedMesh = alterMesh;
 
         Debug.Log("----------END----------------");
+        return 0f;
     }
 
     Vector3 Cubize(Vector3 vv)
