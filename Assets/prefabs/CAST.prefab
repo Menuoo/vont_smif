@@ -157,10 +157,10 @@ MonoBehaviour:
   - {fileID: 4087131285128652628, guid: c035c254812da25928f86bfaa65b8578, type: 3}
   - {fileID: -3955257735826744485, guid: c035c254812da25928f86bfaa65b8578, type: 3}
   prefabs:
-  - {fileID: 8181931078424309200, guid: db35832c72206ed4c8e8538e0a50a7bf, type: 3}
-  - {fileID: 328975335510773861, guid: 9cbdbdd5b6240ca4b88ddb4824e3eaec, type: 3}
-  - {fileID: 3667385275333386524, guid: 33a69173afc285c428dcf5e5f60ee299, type: 3}
-  - {fileID: 706661757208358271, guid: cfaef3a523bde1342834453fb1242ee2, type: 3}
+  - {fileID: 7346124111967991906, guid: 0517ec0d482ae0949a4eae2be8124a03, type: 3}
+  - {fileID: 186925357506194134, guid: 2266df41b4ba48043af2bf4bd93e092a, type: 3}
+  - {fileID: 5603804894487239201, guid: c2b6f960702d83b43ae340895fbe72cf, type: 3}
+  - {fileID: 1624288193105052217, guid: 3057a57585a58b44bb7566387d28bc5e, type: 3}
   castType: 0
   canAttach: 1
 --- !u!114 &304230547574096214
@@ -267,7 +267,7 @@ MonoBehaviour:
       m_Calls: []
   m_AttachTransform: {fileID: 0}
   m_SecondaryAttachTransform: {fileID: 0}
-  m_UseDynamicAttach: 0
+  m_UseDynamicAttach: 1
   m_MatchAttachPosition: 1
   m_MatchAttachRotation: 1
   m_SnapToColliderVolume: 1

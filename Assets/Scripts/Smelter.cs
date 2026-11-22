@@ -30,19 +30,24 @@ public class Smelter : MonoBehaviour
             whichMetal = heatable.metal;
         print("Object is \'"+whichMetal+"\'");
 
-        this.metalCount += 50;
+        this.metalCount += 100;
 
         print("Metal: "+this.metalCount);
-        if(this.metalCount == 100 && available)
+        TryCook();
+                
+        Destroy(other.gameObject); // make sure player hands donut touch it lol :)
+
+
+    }
+
+    void TryCook()
+    {
+        if (this.metalCount >= 100 && available)
         {
             available = false;
             castArea.currentCast.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
             StartCoroutine(Cook());
         }
-                
-        Destroy(other.gameObject); // make sure player hands donut touch it lol :)
-
-
     }
 
     IEnumerator Cook()
@@ -77,6 +82,7 @@ public class Smelter : MonoBehaviour
                 SpawnObject();
                 doOnce = false;
                 available = true;
+                TryCook();
             }
 
             yield return null;
